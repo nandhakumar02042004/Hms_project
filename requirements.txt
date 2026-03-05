@@ -1,7 +1,0 @@
-django==4.2.16
-djangorestframework
-gunicorn
-whitenoise
-dj-database-url
-psycopg2-binary
-django-cors-headers

@@ -1,161 +1,155 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import 'bootstrap/dist/css/bootstrap.min.css'
 import { 
   Users, 
-  Calendar, 
-  UserPlus, 
-  Activity, 
-  LayoutDashboard, 
   Stethoscope, 
-  ChevronRight,
-  Plus
-} from 'lucide-react';
+  Calendar, 
+  CreditCard, 
+  FlaskConical, 
+  Home, 
+  LogOut 
+} from 'lucide-react'
 
-const API_BASE = '/api'; // Proxied to Django
-
-function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [doctors, setDoctors] = useState([]);
-  const [patients, setPatients] = useState([]);
-  const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchData();
-  }, [activeTab]);
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      // These endpoints correspond to the ViewSets in Django
-      const [docs, pats, apps] = await Promise.all([
-        axios.get(`${API_BASE}/hms/doctors/`),
-        axios.get(`${API_BASE}/hms/patients/`),
-        axios.get(`${API_BASE}/hms/appointments/`)
-      ]);
-      setDoctors(docs.data);
-      setPatients(pats.data);
-      setAppointments(apps.data);
-    } catch (err) {
-      console.error("Error fetching data:", err);
-    }
-    setLoading(false);
-  };
-
-  const NavItem = ({ id, icon: Icon, label }) => (
-    <li 
-      className={`nav-item ${activeTab === id ? 'active' : ''}`}
-      onClick={() => setActiveTab(id)}
-    >
-      <Icon size={20} />
-      <span>{label}</span>
-      {activeTab === id && <ChevronRight size={16} ml="auto" />}
-    </li>
-  );
-
-  return (
-    <div className="app-container">
-      {/* Sidebar */}
-      <nav className="sidebar">
-        <div className="logo">
-          <Activity size={32} />
-          <span>HMS Core</span>
-        </div>
-        <ul className="nav-links">
-          <NavItem id="dashboard" icon={LayoutDashboard} label="Dashboard" />
-          <NavItem id="doctors" icon={Stethoscope} label="Doctors" />
-          <NavItem id="patients" icon={Users} label="Patients" />
-          <NavItem id="appointments" icon={Calendar} label="Appointments" />
-        </ul>
-      </nav>
-
-      {/* Main Content */}
-      <main className="main-content">
-        <header className="header">
-          <h1 className="page-title">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
-          <button className="nav-item active" style={{ border: 'none', cursor: 'pointer' }}>
-            <Plus size={18} />
-            <span>New {activeTab.slice(0, -1)}</span>
-          </button>
-        </header>
-
-        {activeTab === 'dashboard' && (
-          <>
-            <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-label">Total Doctors</div>
-                <div className="stat-value">{doctors.length}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Total Patients</div>
-                <div className="stat-value">{patients.length}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Active Appointments</div>
-                <div className="stat-value">{appointments.length}</div>
-              </div>
-            </div>
-
-            <div className="data-card">
-              <h3>Recent Appointments</h3>
-              <table style={{ marginTop: '1rem' }}>
-                <thead>
-                  <tr>
-                    <th>Patient</th>
-                    <th>Doctor</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {appointments.slice(0, 5).map(app => (
-                    <tr key={app.id}>
-                      <td>{app.patient_name || 'Patient ' + app.patient}</td>
-                      <td>{app.doctor_name || 'Dr. ' + app.doctor}</td>
-                      <td>{new Date(app.date).toLocaleDateString()}</td>
-                      <td>
-                        <span className={`badge ${app.status.toLowerCase() === 'scheduled' ? 'badge-pending' : 'badge-success'}`}>
-                          {app.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                  {appointments.length === 0 && (
-                    <tr><td colSpan="4" style={{ textAlign: 'center', color: '#94a3b8', padding: '2rem' }}>No recent appointments found</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-
-        {(activeTab === 'doctors' || activeTab === 'patients') && (
-          <div className="data-card">
-             <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>{activeTab === 'doctors' ? 'Specialization' : 'DOB'}</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(activeTab === 'doctors' ? doctors : patients).map(item => (
-                    <tr key={item.id}>
-                      <td style={{ fontWeight: 600 }}>{item.name || (item.first_name + ' ' + item.last_name)}</td>
-                      <td>{item.specialization || item.dob}</td>
-                      <td>{item.email}</td>
-                      <td>{item.phone_number}</td>
-                    </tr>
-                  ))}
-                </tbody>
-             </table>
+// Basic Component Templates
+const Dashboard = () => (
+  <div className="container mt-4">
+    <h2>Welcome to HMS Admin Dashboard</h2>
+    <div className="row mt-4">
+      <div className="col-md-3">
+        <div className="card text-white bg-primary mb-3">
+          <div className="card-body">
+            <h5 className="card-title">Total Patients</h5>
+            <p className="card-text h2">1,250</p>
           </div>
-        )}
-      </main>
+        </div>
+      </div>
+      <div className="col-md-3">
+        <div className="card text-white bg-success mb-3">
+          <div className="card-body">
+            <h5 className="card-title">Doctors Active</h5>
+            <p className="card-text h2">45</p>
+          </div>
+        </div>
+      </div>
+      <div className="col-md-3">
+        <div className="card text-white bg-info mb-3">
+          <div className="card-body">
+            <h5 className="card-title">Lab Orders</h5>
+            <p className="card-text h2">18</p>
+          </div>
+        </div>
+      </div>
+      <div className="col-md-3">
+        <div className="card text-white bg-warning mb-3">
+          <div className="card-body">
+            <h5 className="card-title">Unpaid Bills</h5>
+            <p className="card-text h2">$4,200</p>
+          </div>
+        </div>
+      </div>
     </div>
-  );
+  </div>
+)
+
+const Patients = () => (
+  <div className="container mt-4 shadow-sm p-4 bg-white rounded">
+    <div className="d-flex justify-content-between align-items-center mb-4">
+      <h3>Patient Management</h3>
+      <button className="btn btn-primary">Add New Patient</button>
+    </div>
+    <table className="table table-hover">
+      <thead className="table-light">
+        <tr>
+          <th>Name</th>
+          <th>Gender</th>
+          <th>DOB</th>
+          <th>Phone</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>John Doe</td>
+          <td>Male</td>
+          <td>1990-05-15</td>
+          <td>+1 234 567 890</td>
+          <td><button className="btn btn-sm btn-outline-info">View</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+)
+
+const App = () => {
+  return (
+    <Router>
+      <div className="d-flex" style={{ minHeight: '100vh', background: '#f8f9fa' }}>
+        {/* Sidebar */}
+        <div className="bg-dark text-white p-3 shadow" style={{ width: '280px' }}>
+          <h4 className="mb-4 text-primary fw-bold">HMS Core</h4>
+          <hr />
+          <ul className="nav nav-pills flex-column mb-auto">
+            <li className="nav-item">
+              <Link to="/" className="nav-link text-white d-flex align-items-center gap-2">
+                <Home size={18} /> Dashboard
+              </Link>
+            </li>
+            <li>
+              <Link to="/patients" className="nav-link text-white d-flex align-items-center gap-2 mt-2">
+                <Users size={18} /> Patients
+              </Link>
+            </li>
+            <li>
+              <Link to="/doctors" className="nav-link text-white d-flex align-items-center gap-2 mt-2">
+                <Stethoscope size={18} /> Doctors
+              </Link>
+            </li>
+            <li>
+              <Link to="/appointments" className="nav-link text-white d-flex align-items-center gap-2 mt-2">
+                <Calendar size={18} /> Appointments
+              </Link>
+            </li>
+            <li>
+              <Link to="/lab-orders" className="nav-link text-white d-flex align-items-center gap-2 mt-2">
+                <FlaskConical size={18} /> Lab Reports
+              </Link>
+            </li>
+            <li>
+              <Link to="/billing" className="nav-link text-white d-flex align-items-center gap-2 mt-2">
+                <CreditCard size={18} /> Billing
+              </Link>
+            </li>
+          </ul>
+          <hr />
+          <div className="mt-auto">
+            <a href="#" className="nav-link text-danger d-flex align-items-center gap-2">
+              <LogOut size={18} /> Sign Out
+            </a>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-grow-1 overflow-auto">
+          <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm px-4">
+            <span className="navbar-brand mb-0 h1">Healthcare Management System</span>
+            <div className="ms-auto">
+              <span className="badge bg-soft-primary text-dark border">Admin User</span>
+            </div>
+          </nav>
+          
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/patients" element={<Patients />} />
+            <Route path="/doctors" element={<div>Doctor Management (WIP)</div>} />
+            <Route path="/appointments" element={<div>Appointments (WIP)</div>} />
+            <Route path="/lab-orders" element={<div>Lab Orders (WIP)</div>} />
+            <Route path="/billing" element={<div>Billing System (WIP)</div>} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
+  )
 }
 
-export default App;
+export default App
